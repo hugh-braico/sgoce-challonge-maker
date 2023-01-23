@@ -27,3 +27,9 @@ python3 main.py
 ```bash
 pyinstaller --onefile -i bigband.ico main.py
 ```
+
+## TODO
+
+* Challonge API v2 to have the following two features
+    * Creating tournaments under the SkullgirlsOceania "community" 
+    * Filling out the game/sport field to be "Skullgirls"

@@ -24,13 +24,17 @@ def nsw_timestamp(d):
         return " 19:00+11:00"
 
 
-def post_api_request(api_url, data):
+def post_api_request(api_url, access_token, data):
     headers = {
-        "User-Agent": "python3/Windows"
+        "User-Agent":          "python3/Windows",
+        "Authorization-Type":  "v2",
+        "Authorization":      f"Bearer {access_token}",
+        "Content-Type":        "application/vnd.api+json",
+        "Accept":              "application/json"
     }
     while True:
-        resp = post(api_url, json=data, headers=headers)
-        if resp: 
+        resp = post(api_url, access_token, json=data, headers=headers)
+        if resp:
             print(f"Success!")
             return
         elif resp.status_code == 422:
@@ -45,7 +49,7 @@ def post_api_request(api_url, data):
             exit()
 
 
-def create_newbbats(api_url, event_date, event_number):
+def create_newbbats(api_url, access_token, event_date, event_number):
     print(f"Creating Newbbats  {event_number} on {event_date.isoformat()}...")
     newbbats_description = "<br>".join([
         "<b>Open to newer players of Skullgirls Oceania and more familiar players trying very new things!</b> Feel free to sign up now, and let me know if anything comes up later on.",
@@ -58,47 +62,62 @@ def create_newbbats(api_url, event_date, event_number):
         "<br>Matches are played on the Black Dahlia beta."
     ])
     data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Newbbats {event_number}",
-            "url": f"sgoce{event_date.year}newbbats{event_number}",
-            "description": newbbats_description,
-            "tournament_type": "round robin",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+        "data": {
+            "type": "tournaments",
+            "attributes": {
+                "name": f"Skullgirls OCE {event_date.year} - Newbbats {event_number}",
+                "url": f"sgoce{event_date.year}newbbats{event_number}",
+                "description": newbbats_description,
+                "tournament_type": "round robin",
+                "start_at": event_date.isoformat() + nsw_timestamp(event_date),
+                "registration_options": {
+                    "open_signup": "true"
+                }
+            }
         }
     }
-    post_api_request(api_url, data)
+    post_api_request(api_url, access_token, data)
 
 
-def create_quickbats(api_url, event_date, event_number):
+def create_quickbats(api_url, access_token, event_date, event_number):
     print(f"Creating Quickbats {event_number} on {event_date.isoformat()}...")
     data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
-            "url": f"sgoce{event_date.year}quickbats{event_number}",
-            "description": "FT2, Top 3 FT3.",
-            "tournament_type": "double elimination",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+        "data": {
+            "type": "tournaments",
+            "attributes": {
+                "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
+                "url": f"sgoce{event_date.year}quickbats{event_number}",
+                "description": "FT2, Top 3 FT3.",
+                "tournament_type": "double elimination",
+                "start_at": event_date.isoformat() + nsw_timestamp(event_date),
+                "registration_options": {
+                    "open_signup": "true"
+                }
+            }
         }
     }
-    post_api_request(api_url, data)
+    post_api_request(api_url, access_token, data)
 
 
-def create_ranbats(api_url, event_date):
+def create_ranbats(api_url, access_token, event_date):
     month_abv = event_date.strftime("%b")
     print(f"Creating Ranbats {month_abv} on {event_date.isoformat()}...")
     data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
-            "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
-            "description": "FT3 all the way through.",
-            "tournament_type": "double elimination",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+        "data": {
+            "type": "tournaments",
+            "attributes": {
+                "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
+                "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
+                "description": "FT3 all the way through.",
+                "tournament_type": "double elimination",
+                "start_at": event_date.isoformat() + nsw_timestamp(event_date),
+                "registration_options": {
+                    "open_signup": "true"
+                }
+            }
         }
     }
-    post_api_request(api_url, data)
+    post_api_request(api_url, access_token, data)
 
 
 if __name__ == "__main__":
@@ -106,7 +125,31 @@ if __name__ == "__main__":
     # get username and API key
     with open("credentials.json", "r") as f:
         creds = json.load(f)
-    api_url = f"""https://{creds["username"]}:{creds["apikey"]}@api.challonge.com/v1/tournaments.json"""
+
+    auth_url = f"""https://api.challonge.com/oauth/token"""
+    auth_params = {
+        "grant_type":    "client_credentials",
+        "client_id":     creds["client_id"],
+        "client_secret": creds["client_secret"],
+        "scope":         "tournaments:write"
+    }
+    print("Getting OAuth access token...")
+    headers = {
+        "User-Agent":   "python3/Windows"
+    }
+    auth_resp = post(auth_url, params=auth_params, headers=headers)
+
+    if auth_resp.status_code == 200: 
+        resp_dict = json.loads(auth_resp.text)
+        access_token = resp_dict["access_token"]
+        print("Success.")
+    else:
+        print(f"ERROR: returned {auth_resp.status_code}")
+        print(auth_resp.text)
+        input("\nPress Enter to continue...")
+        exit()
+
+    api_url = f"""https://api.challonge.com/v2/communities/{creds["community"]}/tournaments.json"""
 
     # get month to generate brackets for
     month_abv = input(f"Enter month to generate brackets for (jan, feb, etc): ").lower()
@@ -145,14 +188,14 @@ if __name__ == "__main__":
     last_friday = last_friday_of_month(year,day_counter.month)
     while day_counter.month == month:
         if day_counter.weekday() == 3:
-            create_newbbats(api_url, day_counter, newbbats_counter)
+            create_newbbats(api_url, access_token, day_counter, newbbats_counter)
             newbbats_counter += 1
         elif day_counter.weekday() == 4 and day_counter != last_friday:
-            create_quickbats(api_url, day_counter, quickbats_counter)
+            create_quickbats(api_url, access_token, day_counter, quickbats_counter)
             quickbats_counter += 1
         day_counter += timedelta(days=1)
 
     # generate ranbats on the last Friday of the month
-    create_ranbats(api_url, last_friday)
+    create_ranbats(api_url, access_token, last_friday)
 
     input("\nDone!\n\nPress Enter to continue...")

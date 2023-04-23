@@ -28,6 +28,15 @@ python3 main.py
 pyinstaller --onefile -i bigband.ico main.py
 ```
 
+## Limitations
+
+Due to API support the following things still need to be done manually:
+
+* Setting the game to "Skullgirls"
+* Setting the tournament to "Community" so it can be run by accounts other than the SGOCE challonge account
+* Setting the signup page to public
+* Enabling custom round labels (if you want them)
+
 ## TODO
 
 * Challonge API v2 to have the following two features

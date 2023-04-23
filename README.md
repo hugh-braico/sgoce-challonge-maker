@@ -4,6 +4,13 @@ Automatic bracket maker for Skullgirls Oceania. Might give you some ideas for
 how to automate your own challonge brackets, but this isn't a tool that people
 outside SGOCE can pick up.
 
+Due to API support the following things still need to be done manually after the fact:
+
+* Setting the game to "Skullgirls"
+* Setting the tournament to "Community" so it can be run by accounts other than the SGOCE challonge account
+* Setting the signup page to public
+* Enabling custom round labels (if you want them)
+
 ## How to use from packaged exe
 
 1. Extract the zip file somewhere
@@ -27,15 +34,6 @@ python3 main.py
 ```bash
 pyinstaller --onefile -i bigband.ico main.py
 ```
-
-## Limitations
-
-Due to API support the following things still need to be done manually:
-
-* Setting the game to "Skullgirls"
-* Setting the tournament to "Community" so it can be run by accounts other than the SGOCE challonge account
-* Setting the signup page to public
-* Enabling custom round labels (if you want them)
 
 ## TODO
 

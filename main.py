@@ -59,7 +59,7 @@ def create_newbbats(api_url, access_token, event_date, event_number):
         "<b>5-7: FT3 round robin</b>",
         "<b>8+: FT3 Swiss (5 rounds)</b>",
         "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background.",
-        "<br>Matches are played on the Black Dahlia beta."
+        "<br>Matches are played on the PC Retail version."
     ])
     data = {
         "data": {

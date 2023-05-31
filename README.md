@@ -25,8 +25,11 @@ cp credentials.json.tmpl credentials.json
 
 # (in a text editor, fill out username and API key in credentials.json)
 
+# install deps
+python -m pip install -r requirements.txt
+
 # run script
-python3 main.py
+python main.py
 ```
 
 ## How to package your own release to exe

@@ -52,10 +52,10 @@ def create_newbbats(api_url, event_date, event_number):
         "<br><b>The format depends on the number of entrants:</b>",
         "<b>2: One FT10 set</b>",
         "<b>3-4: FT5 round robin</b>",
-        "<b>5-7: FT3 round robin</b>",
-        "<b>8+: FT3 Swiss (5 rounds)</b>",
+        "<b>5-6: FT3 round robin</b>",
+        "<b>7+: FT3 Swiss (5 rounds)</b>",
         "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background.",
-        "<br>Matches are played on the Black Dahlia beta."
+        "<br><b>We're going to be running on Retail currently.</b>"
     ])
     data = {
         "tournament": {
@@ -76,7 +76,10 @@ def create_quickbats(api_url, event_date, event_number):
         "tournament": {
             "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
             "url": f"sgoce{event_date.year}quickbats{event_number}",
-            "description": "FT2, Top 3 FT3.",
+            "description": "<br>".join([
+                "SGOCE's weekly netplay tournament, designed to finish nice and quickly. All sets are FT2, except for Winners Final, Losers Final, and Grand Final, which are all FT3.",
+                "<br><b>We're going to be running on Retail currently.</b>"
+            ]),
             "tournament_type": "double elimination",
             "start_at": event_date.isoformat() + nsw_timestamp(event_date),
             "open_signup": "true"
@@ -92,7 +95,10 @@ def create_ranbats(api_url, event_date):
         "tournament": {
             "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
             "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
-            "description": "FT3 all the way through.",
+            "description": "<br>".join([
+                "SGOCE's premier netplay monthly tournament! FT3 all the way through.",
+                "<br><b>We're going to be running on Retail currently.</b>"
+            ]),
             "tournament_type": "double elimination",
             "start_at": event_date.isoformat() + nsw_timestamp(event_date),
             "open_signup": "true"

@@ -54,8 +54,7 @@ def create_newbbats(api_url, event_date, event_number):
         "<b>3-4: FT5 round robin</b>",
         "<b>5-6: FT3 round robin</b>",
         "<b>7+: FT3 Swiss (5 rounds)</b>",
-        "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background.",
-        "<br><b>We're going to be running on Retail currently.</b>"
+        "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background."
     ])
     data = {
         "tournament": {
@@ -77,8 +76,7 @@ def create_quickbats(api_url, event_date, event_number):
             "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
             "url": f"sgoce{event_date.year}quickbats{event_number}",
             "description": "<br>".join([
-                "SGOCE's weekly netplay tournament, designed to finish nice and quickly. All sets are FT2, except for Winners Final, Losers Final, and Grand Final, which are all FT3.",
-                "<br><b>We're going to be running on Retail currently.</b>"
+                "SGOCE's weekly netplay tournament, designed to finish nice and quickly. All sets are FT2, except for Winners Final, Losers Final, and Grand Final, which are all FT3."
             ]),
             "tournament_type": "double elimination",
             "start_at": event_date.isoformat() + nsw_timestamp(event_date),
@@ -96,8 +94,7 @@ def create_ranbats(api_url, event_date):
             "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
             "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
             "description": "<br>".join([
-                "SGOCE's premier netplay monthly tournament! FT3 all the way through.",
-                "<br><b>We're going to be running on Retail currently.</b>"
+                "SGOCE's premier netplay monthly tournament, held on the final Friday of each month! Double elimination, and FT3 all the way through."
             ]),
             "tournament_type": "double elimination",
             "start_at": event_date.isoformat() + nsw_timestamp(event_date),
@@ -133,21 +130,29 @@ if __name__ == "__main__":
     if month == 1 and today.month == 12:
         year += 1
 
-    # figure out which newbbats/quickbats number to start from
+    ############ 2026 override: start brackets from the 3rd week of January
+    if year == 2026:
+        day_counter = date.fromisoformat(f"{year}-01-14")
+    else:
+        day_counter = date.fromisoformat(f"{year}-01-01")
+
     newbbats_counter = 1
     quickbats_counter = 1
-    day_counter = date.fromisoformat(f"{year}-01-01")
+
+    # Figure out where to start Newbbats and Quickbats numbering by going through prior months
     while day_counter.month != month:
         if day_counter.weekday() == 3:
             newbbats_counter += 1
-            # print(f"{day_counter.isoformat()} is a Thursday, newbbats_counter = {newbbats_counter}")
         if day_counter.weekday() == 4 and day_counter != last_friday_of_month(year,day_counter.month):
             quickbats_counter += 1
-            # print(f"{day_counter.isoformat()} is a non-final Friday, quickbats_counter = {quickbats_counter}")
         day_counter += timedelta(days=1)
 
-    # generate newbbats and quickbats brackets
-    day_counter = date.fromisoformat(f"{year}-{month:02d}-01")
+    # Generate newbbats and quickbats brackets
+    if year == 2026 and month == 1:
+        day_counter = date.fromisoformat(f"{year}-{month:02d}-14")
+    else:
+        day_counter = date.fromisoformat(f"{year}-{month:02d}-01")
+
     last_friday = last_friday_of_month(year,day_counter.month)
     while day_counter.month == month:
         if day_counter.weekday() == 3:

@@ -1,5 +1,4 @@
-credentials.json
-credentials_apiv2.json
+credentials*
 build/
 dist/
 __pycache__/

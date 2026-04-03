@@ -140,9 +140,15 @@ if __name__ == "__main__":
     quickbats_counter = 1
 
     # Figure out where to start Newbbats and Quickbats numbering by going through prior months
+    skip_week = True
     while day_counter.month != month:
         if day_counter.weekday() == 3:
-            newbbats_counter += 1
+            # In 2026, jan has newbbats every week, but every 2 weeks after that
+            if day_counter.month > 1 and skip_week:
+                skip_week = False
+            else:
+                newbbats_counter += 1
+                skip_week = True
         if day_counter.weekday() == 4 and day_counter != last_friday_of_month(year,day_counter.month):
             quickbats_counter += 1
         day_counter += timedelta(days=1)
@@ -156,8 +162,13 @@ if __name__ == "__main__":
     last_friday = last_friday_of_month(year,day_counter.month)
     while day_counter.month == month:
         if day_counter.weekday() == 3:
-            create_newbbats(api_url, day_counter, newbbats_counter)
-            newbbats_counter += 1
+            # In 2026, jan has newbbats every week, but every 2 weeks after that
+            if day_counter.month > 1 and skip_week:
+                skip_week = False
+            else:
+                create_newbbats(api_url, day_counter, newbbats_counter)
+                newbbats_counter += 1
+                skip_week = True
         elif day_counter.weekday() == 4 and day_counter != last_friday:
             create_quickbats(api_url, day_counter, quickbats_counter)
             quickbats_counter += 1

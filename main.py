@@ -6,31 +6,35 @@ from dateutil.relativedelta import FR, SU, relativedelta
 
 
 # Get date object representing the last friday of a given month
-def last_friday_of_month(y,m):
+def last_friday_of_month(y, m):
     return date.fromisoformat(f"{y}-{m:02d}-01") + relativedelta(day=31, weekday=FR(-1))
 
 
 # Get date object representing the first sunday of a given month
-def first_sunday_of_month(y,m):
+def first_sunday_of_month(y, m):
     return date.fromisoformat(f"{y}-{m:02d}-01") + relativedelta(day=1, weekday=SU(1))
 
 
 # Tournaments are run at 7pm NSW time, but NSW has daylight savings
 # Given a day, figure out the UTC timestamp we need to use for it to be 7pm NSW
 def nsw_timestamp(d):
-    if d >= first_sunday_of_month(d.year,4) and d < first_sunday_of_month(d.year,10):
+    if d >= first_sunday_of_month(d.year, 4) and d < first_sunday_of_month(d.year, 10):
         return " 19:00+10:00"
     else:
         return " 19:00+11:00"
 
 
-def post_api_request(api_url, data):
+def post_api_request(data):
     headers = {
-        "User-Agent": "python3/Windows"
+        "User-Agent": "python3/Windows",
+        "Content-Type": "application/vnd.api+json",
+        "Accept": "application/json",
+        "Authorization-Type": "v1",
+        "Authorization": api_key,
     }
     while True:
         resp = post(api_url, json=data, headers=headers)
-        if resp: 
+        if resp:
             print(f"Success!")
             return
         elif resp.status_code == 422:
@@ -45,77 +49,116 @@ def post_api_request(api_url, data):
             exit()
 
 
-def create_newbbats(api_url, event_date, event_number):
+def create_newbbats(event_date, event_number):
     print(f"Creating Newbbats  {event_number} on {event_date.isoformat()}...")
-    newbbats_description = "<br>".join([
-        "<b>Open to newer players of Skullgirls Oceania and more familiar players trying very new things!</b> Feel free to sign up now, and let me know if anything comes up later on.",
-        "<br><b>The format depends on the number of entrants:</b>",
-        "<b>2: One FT10 set</b>",
-        "<b>3-4: FT5 round robin</b>",
-        "<b>5-6: FT3 round robin</b>",
-        "<b>7+: FT3 Swiss (5 rounds)</b>",
-        "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background."
-    ])
-    data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Newbbats {event_number}",
-            "url": f"sgoce{event_date.year}newbbats{event_number}",
-            "description": newbbats_description,
-            "tournament_type": "round robin",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+    newbbats_description = "<br>".join(
+        [
+            "<b>Open to newer players of Skullgirls Oceania and more familiar players trying very new things!</b> Feel free to sign up now, and let me know if anything comes up later on.",
+            "<br><b>The format depends on the number of entrants:</b>",
+            "<b>2: One FT10 set</b>",
+            "<b>3-4: FT5 round robin</b>",
+            "<b>5-6: FT3 round robin</b>",
+            "<b>7+: FT3 Swiss (5 rounds)</b>",
+            "<br>If it's round robin, you're free to organise your matches to happen in any order - just remember to report your scores as you go. I'll be streaming/commentating some of the matches while the others happen in the background.",
+        ]
+    )
+    post_api_request(
+        data={
+            "data": {
+                "type": "tournament",
+                "attributes": {
+                    "name": f"Skullgirls OCE {event_date.year} - Newbbats {event_number}",
+                    "url": f"sgoce{event_date.year}newbbats{event_number}",
+                    "game_name": "Skullgirls",
+                    "description": newbbats_description,
+                    "tournament_type": "round robin",
+                    "round_robin_options": {"iterations": 1, "ranking": "match wins"},
+                    "starts_at": event_date.isoformat() + nsw_timestamp(event_date),
+                    "registration_options": {
+                        "open_signup": "true",
+                    },
+                },
+            }
         }
-    }
-    post_api_request(api_url, data)
+    )
 
 
-def create_quickbats(api_url, event_date, event_number):
+def create_quickbats(event_date, event_number):
     print(f"Creating Quickbats {event_number} on {event_date.isoformat()}...")
-    data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
-            "url": f"sgoce{event_date.year}quickbats{event_number}",
-            "description": "<br>".join([
-                "SGOCE's weekly netplay tournament, designed to finish nice and quickly. All sets are FT2, except for Winners Final, Losers Final, and Grand Final, which are all FT3."
-            ]),
-            "tournament_type": "double elimination",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+    post_api_request(
+        data={
+            "data": {
+                "type": "tournament",
+                "attributes": {
+                    "name": f"Skullgirls OCE {event_date.year} - Quickbats {event_number}",
+                    "url": f"sgoce{event_date.year}quickbats{event_number}",
+                    "game_name": "Skullgirls",
+                    "description": "<br>".join(
+                        [
+                            "SGOCE's weekly netplay tournament, designed to finish nice and quickly. All sets are FT2, except for Winners Final, Losers Final, and Grand Final, which are all FT3."
+                        ]
+                    ),
+                    "tournament_type": "double elimination",
+                    "starts_at": event_date.isoformat() + nsw_timestamp(event_date),
+                    "registration_options": {
+                        "open_signup": "true",
+                    },
+                },
+            }
         }
-    }
-    post_api_request(api_url, data)
+    )
 
 
-def create_ranbats(api_url, event_date):
+def create_ranbats(event_date):
     month_abv = event_date.strftime("%b")
     print(f"Creating Ranbats {month_abv} on {event_date.isoformat()}...")
-    data = {
-        "tournament": {
-            "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
-            "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
-            "description": "<br>".join([
-                "SGOCE's premier netplay monthly tournament, held on the final Friday of each month! Double elimination, and FT3 all the way through."
-            ]),
-            "tournament_type": "double elimination",
-            "start_at": event_date.isoformat() + nsw_timestamp(event_date),
-            "open_signup": "true"
+    post_api_request(
+        data={
+            "data": {
+                "type": "tournament",
+                "attributes": {
+                    "name": f"Skullgirls OCE {event_date.year} - Ranbats {month_abv}",
+                    "url": f"sgoce{event_date.year}ranbats{month_abv.lower()}",
+                    "game_name": "Skullgirls",
+                    "description": "<br>".join(
+                        [
+                            "SGOCE's premier netplay monthly tournament, held on the final Friday of each month! Double elimination, and FT3 all the way through."
+                        ]
+                    ),
+                    "tournament_type": "double elimination",
+                    "starts_at": event_date.isoformat() + nsw_timestamp(event_date),
+                    "registration_options": {
+                        "open_signup": "true",
+                    },
+                },
+            }
         }
-    }
-    post_api_request(api_url, data)
+    )
 
 
 if __name__ == "__main__":
-
-    # get username and API key
-    with open("credentials.json", "r") as f:
+    # New API v2.1 endpoint, but still using old v1 style auth
+    # since we create them here, api_url and api_key are globals
+    with open("credentials_v1.json", "r") as f:
         creds = json.load(f)
-    api_url = f"""https://{creds["username"]}:{creds["apikey"]}@api.challonge.com/v1/tournaments.json"""
+    api_url = f"""https://api.challonge.com/v2.1/tournaments.json?community_id=SkullgirlsOceania"""
+    api_key = creds["apikey"]
 
     # get month to generate brackets for
     month_abv = input(f"Enter month to generate brackets for (jan, feb, etc): ").lower()
     month_mapping = {
-        "jan": 1, "feb": 2, "mar": 3, "apr": 4,  "may": 5,  "jun": 6,
-        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12
+        "jan": 1,
+        "feb": 2,
+        "mar": 3,
+        "apr": 4,
+        "may": 5,
+        "jun": 6,
+        "jul": 7,
+        "aug": 8,
+        "sep": 9,
+        "oct": 10,
+        "nov": 11,
+        "dec": 12,
     }
     if month_abv not in month_mapping:
         print(f"ERROR: month must be one of {list(month_mapping.keys())}")
@@ -149,7 +192,9 @@ if __name__ == "__main__":
             else:
                 newbbats_counter += 1
                 skip_week = True
-        if day_counter.weekday() == 4 and day_counter != last_friday_of_month(year,day_counter.month):
+        if day_counter.weekday() == 4 and day_counter != last_friday_of_month(
+            year, day_counter.month
+        ):
             quickbats_counter += 1
         day_counter += timedelta(days=1)
 
@@ -159,22 +204,22 @@ if __name__ == "__main__":
     else:
         day_counter = date.fromisoformat(f"{year}-{month:02d}-01")
 
-    last_friday = last_friday_of_month(year,day_counter.month)
+    last_friday = last_friday_of_month(year, day_counter.month)
     while day_counter.month == month:
         if day_counter.weekday() == 3:
             # In 2026, jan has newbbats every week, but every 2 weeks after that
             if day_counter.month > 1 and skip_week:
                 skip_week = False
             else:
-                create_newbbats(api_url, day_counter, newbbats_counter)
+                create_newbbats(day_counter, newbbats_counter)
                 newbbats_counter += 1
                 skip_week = True
         elif day_counter.weekday() == 4 and day_counter != last_friday:
-            create_quickbats(api_url, day_counter, quickbats_counter)
+            create_quickbats(day_counter, quickbats_counter)
             quickbats_counter += 1
         day_counter += timedelta(days=1)
 
     # generate ranbats on the last Friday of the month
-    create_ranbats(api_url, last_friday)
+    create_ranbats(last_friday)
 
     input("\nDone!\n\nPress Enter to continue...")
